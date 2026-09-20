@@ -1,0 +1,38 @@
+.location-actions {
+  display: flex;
+  gap: .55rem;
+  flex-wrap: wrap;
+  margin-top: 1.2rem;
+}
+
+.location-actions a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: .58rem .78rem;
+  border: 1px solid currentColor;
+  border-radius: 99px;
+  font-size: .72rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.location-actions .book-outlet {
+  background: var(--green);
+  border-color: var(--green);
+  color: var(--cream);
+}
+
+.location.featured .location-actions .book-outlet {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: var(--green);
+}
+
+.location.featured .location-actions a:not(.book-outlet) {
+  border-color: rgba(244,237,223,.55);
+}
+
+@media (max-width: 640px) {
+  .location-actions a { flex: 1 1 auto; }
+}
