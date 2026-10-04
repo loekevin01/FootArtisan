@@ -37,7 +37,8 @@ footer{padding:20px 0 40px;color:var(--moss);font-size:12px;text-align:center}
   <h1>My Membership</h1>
   <p class="muted">See your stored value, package sessions, visit history and the terms.</p>
   <form class="card" id="f" autocomplete="off">
-   <label for="ph">Mobile number</label><input id="ph" inputmode="numeric" placeholder="8-digit number, e.g. 9123 4567" required>
+   <label for="ph">Mobile number</label><input id="ph" inputmode="tel" placeholder="e.g. 9123 4567, or +44 7700 900123" required>
+   <div class="muted" style="margin-top:4px">Singapore number: 8 digits. Overseas: include the country code (+ and digits).</div>
    <label for="cd">Member number</label><input id="cd" placeholder="e.g. F0123" autocapitalize="characters" required>
    <div class="err" id="e" role="alert"></div>
    <button class="btn" id="go">View my membership</button>
