@@ -93,7 +93,7 @@ function show(d){
   }
   $('hn').textContent=d.history.length>=300?'Showing your latest 300 entries.':''
   const t=d.terms.text.trim()
-  $('tt').textContent=(t?t+'\n\n':'')+'Stored value is valid for '+d.terms.validMonths+' months from your last top-up. Package sessions are valid for '+d.terms.validMonths+' months from the day they were added. Please ask the shop if anything is unclear.'
+  $('tt').textContent=t||('Stored value is valid for '+d.terms.validMonths+' months from your last top-up. Package sessions are valid for '+d.terms.validMonths+' months from the day they were added. Please ask the shop if anything is unclear.')
   window.scrollTo(0,0)
 }
 $('out').onclick=()=>{$('f').reset();$('view').hidden=true;$('login').hidden=false;$('hl').replaceChildren();$('pkl').replaceChildren()}
