@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>My Membership | Foot Artisan Reflexology × Bodyworks</title>
+<meta name="theme-color" content="#3B4A3D">
+<style>
+:root{--forest:#3B4A3D;--forest-d:#2b362c;--cream:#EDE6D8;--paper:#F7F3EC;--sand:#DDD3C2;--moss:#66756a;--ink:#23291f;--red:#a63a2e;--ok:#1f6b45}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif}
+header{background:#ECE5DE;border-bottom:1px solid var(--sand)}
+.wrap{max-width:560px;margin:0 auto;padding:0 16px}
+.bar{display:flex;align-items:center;gap:10px;height:60px}.bar img{height:38px}.bar b{font-size:17px;color:var(--forest-d);line-height:1.1}.bar small{display:block;font-size:12px;color:var(--moss);font-weight:400}
+h1{font-size:24px;margin:22px 0 4px;color:var(--forest-d)}h2{font-size:17px;margin:0 0 8px;color:var(--forest-d)}
+.card{background:#fff;border:1px solid var(--sand);border-radius:14px;padding:16px;margin:14px 0}
+label{display:block;font-size:14px;font-weight:600;margin:12px 0 4px}
+input{width:100%;font:inherit;padding:11px 12px;border:1px solid var(--sand);border-radius:10px}
+.btn{width:100%;margin-top:16px;border:0;border-radius:10px;background:var(--forest);color:var(--cream);padding:12px;font:inherit;font-weight:600;cursor:pointer}
+.btn:disabled{opacity:.5}.btn.ghost{background:#fff;color:var(--forest-d);border:1px solid var(--sand)}
+.err{color:var(--red);font-size:14px;margin-top:10px}.muted{color:var(--moss);font-size:14px}
+.big{font-size:34px;font-weight:700;color:var(--forest-d);line-height:1.1}
+.row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px dashed var(--sand)}.row:last-child{border:0}
+.row .r{text-align:right;white-space:nowrap;font-weight:600}.row small{display:block;color:var(--moss);font-weight:400}
+.pos{color:var(--ok)}.warn{color:var(--red)}
+details summary{cursor:pointer;font-weight:600;color:var(--forest-d)}
+.terms{white-space:pre-wrap;font-size:14px;margin-top:10px}
+footer{padding:20px 0 40px;color:var(--moss);font-size:12px;text-align:center}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<header><div class="wrap bar"><img src="../logo.webp" alt=""><b>Foot Artisan Reflexology × Bodyworks<small>My Membership</small></b></div></header>
+<main class="wrap">
+ <section id="login">
+  <h1>My Membership</h1>
+  <p class="muted">See your stored value, package sessions, visit history and the terms.</p>
+  <form class="card" id="f" autocomplete="off">
+   <label for="ph">Mobile number</label><input id="ph" inputmode="numeric" placeholder="8-digit number, e.g. 9123 4567" required>
+   <label for="cd">Member number</label><input id="cd" placeholder="e.g. F0123" autocapitalize="characters" required>
+   <div class="err" id="e" role="alert"></div>
+   <button class="btn" id="go">View my membership</button>
+   <p class="muted" style="margin:12px 0 0">Your member number is on your membership card or receipt. Ask the shop if you do not have it.</p>
+  </form>
+ </section>
+ <section id="view" hidden>
+  <h1 id="hi"></h1><p class="muted" id="sub"></p>
+  <div class="card"><h2>Stored value</h2><div class="big" id="bal"></div><div class="muted" id="exp"></div></div>
+  <div class="card" id="pk"><h2>Package sessions</h2><div id="pkl"></div></div>
+  <div class="card"><h2>History</h2><div id="hl"></div><p class="muted" id="hn"></p></div>
+  <div class="card"><details id="tm"><summary>Terms &amp; Conditions</summary><div class="terms" id="tt"></div></details></div>
+  <button class="btn ghost" id="out" type="button">Log out</button>
+ </section>
+</main>
+<footer class="wrap">© Foot Artisan Reflexology Pte Ltd · Your details are shown only to you.</footer>
+<script>
+const API='https://llvsrmkluwqgpljaammk.supabase.co/functions/v1/member'
+const $=id=>document.getElementById(id)
+const money=n=>(n<0?'-':'')+'$'+Math.abs(n).toFixed(2).replace(/\.00$/,'')
+const day=s=>{const d=new Date(s+'T00:00:00');return d.toLocaleDateString('en-SG',{day:'numeric',month:'short',year:'numeric'})}
+const clock=m=>{const h=Math.floor(m/60),mm=String(m%60).padStart(2,'0');return (h%12||12)+':'+mm+(h<12?' am':' pm')}
+function el(t,c,x){const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
+function row(left,sub,right,cls){const r=el('div','row'),l=el('div');l.append(el('span',null,left));if(sub)l.append(el('small',null,sub));const v=el('div','r'+(cls?' '+cls:''),right);r.append(l,v);return r}
+$('f').addEventListener('submit',async ev=>{
+  ev.preventDefault();$('e').textContent='';$('go').disabled=true
+  try{
+    const r=await fetch(API,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({phone:$('ph').value,code:$('cd').value})})
+    const d=await r.json();if(!d.ok){$('e').textContent=d.error||'Something went wrong.';return}
+    show(d)
+  }catch{$('e').textContent='No connection. Please try again.'}finally{$('go').disabled=false}
+})
+function show(d){
+  $('login').hidden=true;$('view').hidden=false
+  $('hi').textContent='Hello, '+d.member.name.split(' ')[0]
+  $('sub').textContent='Member '+d.member.code+(d.member.shop?' · '+d.member.shop:'')+' · as of '+day(d.today)
+  $('bal').textContent=money(d.wallet.balance)
+  $('exp').textContent=d.wallet.expired?'Your credit expired on '+day(d.wallet.expiry)+'.':d.wallet.expiry&&d.wallet.balance>0?'Use by '+day(d.wallet.expiry):''
+  const pl=$('pkl');pl.replaceChildren()
+  $('pk').hidden=!d.packages.length
+  for(const p of d.packages)pl.append(row(p.label,p.expired?'Expired '+day(p.expiry):'Use by '+day(p.expiry),p.left+' of '+p.bought+' left',p.expired?'warn':''))
+  const hl=$('hl');hl.replaceChildren()
+  if(!d.history.length)hl.append(el('p','muted','No visits yet. Your history will appear here after your next visit.'))
+  for(const h of d.history){
+    const ths=h.therapists&&h.therapists.length?' · with '+h.therapists.join(', '):''
+    const when=day(h.date)+(h.kind==='visit'&&h.time?' · '+clock(h.time):'')
+    let right='',cls=''
+    if(h.kind==='visit'){right=money(h.amount||0)}
+    else if(h.amount!=null){right=(h.amount>0?'+':'')+money(h.amount);cls=h.amount>0?'pos':''}
+    else if(h.sessions!=null){right=(h.sessions>0?'+':'')+h.sessions+' session'+(Math.abs(h.sessions)===1?'':'s');cls=h.sessions>0?'pos':''}
+    const sub=when+ths+(h.paidBy?' · paid with '+h.paidBy.toLowerCase():'')+(h.shop?' · '+h.shop:'')
+    hl.append(row(h.text||'Visit',sub,right,cls))
+  }
+  $('hn').textContent=d.history.length>=300?'Showing your latest 300 entries.':''
+  const t=d.terms.text.trim()
+  $('tt').textContent=(t?t+'\n\n':'')+'Stored value is valid for '+d.terms.validMonths+' months from your last top-up. Package sessions are valid for '+d.terms.validMonths+' months from the day they were added. Please ask the shop if anything is unclear.'
+  window.scrollTo(0,0)
+}
+$('out').onclick=()=>{$('f').reset();$('view').hidden=true;$('login').hidden=false;$('hl').replaceChildren();$('pkl').replaceChildren()}
+</script>
+</body>
+</html>
