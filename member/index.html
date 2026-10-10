@@ -50,6 +50,9 @@ footer{padding:20px 0 40px;color:var(--moss);font-size:12px;text-align:center}
   <div class="card"><h2>Stored value</h2><div class="big" id="bal"></div><div class="muted" id="exp"></div></div>
   <div class="card" id="pk"><h2>Package sessions</h2><div id="pkl"></div></div>
   <div class="card"><h2>History</h2><div id="hl"></div><p class="muted" id="hn"></p></div>
+  <div class="card"><h2>Offers &amp; updates</h2>
+   <label style="display:flex;gap:10px;align-items:flex-start;font-weight:400;margin:0"><input type="checkbox" id="cs" style="width:20px;height:20px;margin-top:2px;flex:none"> <span>Yes, send me offers and updates from Foot Artisan by WhatsApp or SMS. I can stop any time by unticking this box or telling the shop.</span></label>
+   <div class="muted" id="csm" role="status" style="margin-top:6px"></div></div>
   <div class="card"><details id="tm"><summary>Terms &amp; Conditions</summary><div class="terms" id="tt"></div></details></div>
   <button class="btn ghost" id="out" type="button">Log out</button>
  </section>
@@ -57,6 +60,7 @@ footer{padding:20px 0 40px;color:var(--moss);font-size:12px;text-align:center}
 <footer class="wrap">© Foot Artisan Reflexology Pte Ltd · Your details are shown only to you.</footer>
 <script>
 const API='https://llvsrmkluwqgpljaammk.supabase.co/functions/v1/member'
+let cred=null
 const $=id=>document.getElementById(id)
 const money=n=>(n<0?'-':'')+'$'+Math.abs(n).toFixed(2).replace(/\.00$/,'')
 const day=s=>{const d=new Date(s+'T00:00:00');return d.toLocaleDateString('en-SG',{day:'numeric',month:'short',year:'numeric'})}
@@ -68,6 +72,7 @@ $('f').addEventListener('submit',async ev=>{
   try{
     const r=await fetch(API,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({phone:$('ph').value,code:$('cd').value})})
     const d=await r.json();if(!d.ok){$('e').textContent=d.error||'Something went wrong.';return}
+    cred={phone:$('ph').value,code:$('cd').value}
     show(d)
   }catch{$('e').textContent='No connection. Please try again.'}finally{$('go').disabled=false}
 })
@@ -95,9 +100,19 @@ function show(d){
   $('hn').textContent=d.history.length>=300?'Showing your latest 300 entries.':''
   const t=d.terms.text.trim()
   $('tt').textContent=t||('Stored value is valid for '+d.terms.validMonths+' months from your last top-up. Package sessions are valid for '+d.terms.validMonths+' months from the day they were added. Please ask the shop if anything is unclear.')
+  $('cs').checked=!!d.member.consent;$('csm').textContent=''
   window.scrollTo(0,0)
 }
-$('out').onclick=()=>{$('f').reset();$('view').hidden=true;$('login').hidden=false;$('hl').replaceChildren();$('pkl').replaceChildren()}
+$('cs').addEventListener('change',async()=>{
+  if(!cred)return
+  const want=$('cs').checked;$('cs').disabled=true;$('csm').textContent='Saving…'
+  try{
+    const r=await fetch(API,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({...cred,action:'consent',agree:want})})
+    const d=await r.json();if(!d.ok)throw new Error(d.error||'')
+    $('csm').textContent=want?'Thank you. You will receive our offers and updates.':'Done. We will not send you offers or updates.'
+  }catch(e){$('cs').checked=!want;$('csm').textContent='Could not save. Please try again.'}finally{$('cs').disabled=false}
+})
+$('out').onclick=()=>{cred=null;$('f').reset();$('view').hidden=true;$('login').hidden=false;$('hl').replaceChildren();$('pkl').replaceChildren()}
 </script>
 </body>
 </html>
